@@ -8,6 +8,7 @@ require './lib/ostools.rb'
 name 'datadog-agent-integrations'
 
 dependency 'pip'
+dependency 'protobuf-py-cpp'
 
 relative_path 'integrations-core'
 whitelist_file "embedded/lib/python2.7"
