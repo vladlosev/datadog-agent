@@ -12,8 +12,8 @@ import (
 
 	log "github.com/cihub/seelog"
 
-	"github.com/ericchiang/k8s/api/v1"
-	metav1 "github.com/ericchiang/k8s/apis/meta/v1"
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/DataDog/datadog-agent/pkg/tagger/utils"
 	"github.com/DataDog/datadog-agent/pkg/util/kubernetes/apiserver"
@@ -88,16 +88,17 @@ func (c *KubeServiceCollector) addToCacheServiceMapping(kubeletPodList []*kubele
 		if nodeName == "" && p.Spec.NodeName != "" {
 			nodeName = p.Spec.NodeName
 		}
+
 		pod := &v1.Pod{
-			Metadata: &metav1.ObjectMeta{
-				Name:      &p.Metadata.Name,
-				Namespace: &p.Metadata.Namespace,
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      p.Metadata.Name,
+				Namespace: p.Metadata.Namespace,
 			},
-			Status: &v1.PodStatus{
-				PodIP: &p.Status.PodIP,
+			Status: v1.PodStatus{
+				PodIP: p.Status.PodIP,
 			},
 		}
-		podList.Items = append(podList.Items, pod)
+		podList.Items = append(podList.Items, *pod)
 	}
 	return c.apiClient.NodeServiceMapping(nodeName, podList)
 }
