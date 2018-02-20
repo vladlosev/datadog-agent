@@ -18,9 +18,9 @@ import (
 
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/DataDog/datadog-agent/pkg/config"
 	"github.com/DataDog/datadog-agent/pkg/util/cache"
@@ -32,7 +32,7 @@ var (
 	globalTimeoutSeconds = int64(5)
 	ErrNotFound          = errors.New("entity not found")
 	ErrOutdated          = errors.New("entity is outdated")
-	ErrNotLeader = errors.New("not Leader")
+	ErrNotLeader         = errors.New("not Leader")
 )
 
 const (
