@@ -9,14 +9,12 @@ import (
 	"os"
 	"path"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/DataDog/datadog-agent/pkg/config"
 	"github.com/DataDog/datadog-agent/pkg/metadata/common"
 	"github.com/DataDog/datadog-agent/pkg/util"
 	"github.com/DataDog/datadog-agent/pkg/util/cache"
-	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/host"
 
 	"github.com/DataDog/datadog-agent/pkg/util/azure"
@@ -97,31 +95,6 @@ func getHostTags() *tags {
 	}
 }
 
-func getSystemStats() *systemStats {
-	var stats *systemStats
-	key := buildKey("systemStats")
-	if x, found := cache.Cache.Get(key); found {
-		stats = x.(*systemStats)
-	} else {
-		cpuInfo := getCPUInfo()
-		hostInfo := getHostInfo()
-
-		stats = &systemStats{
-			Machine:   runtime.GOARCH,
-			Platform:  runtime.GOOS,
-			Processor: cpuInfo.ModelName,
-			CPUCores:  cpuInfo.Cores,
-			Pythonv:   strings.Split(getPythonVersion(), " ")[0],
-		}
-
-		// fill the platform dependent bits of info
-		fillOsVersion(stats, hostInfo)
-		cache.Cache.Set(key, stats, cache.NoExpiration)
-	}
-
-	return stats
-}
-
 // getPythonVersion returns the version string as provided by the embedded Python
 // interpreter. The string is stored in the Agent cache when the interpreter is
 // initialized (see pkg/collector/py/utils.go), an empty value is expected when
@@ -133,40 +106,6 @@ func getPythonVersion() string {
 	}
 
 	return "n/a"
-}
-
-// getCPUInfo returns InfoStat for the first CPU gopsutil found
-func getCPUInfo() *cpu.InfoStat {
-	key := buildKey("cpuInfo")
-	if x, found := cache.Cache.Get(key); found {
-		return x.(*cpu.InfoStat)
-	}
-
-	i, err := cpu.Info()
-	if err != nil {
-		// don't cache and return zero value
-		log.Errorf("failed to retrieve cpu info: %s", err)
-		return &cpu.InfoStat{}
-	}
-	info := &i[0]
-	cache.Cache.Set(key, info, cache.NoExpiration)
-	return info
-}
-
-func getHostInfo() *host.InfoStat {
-	key := buildKey("hostInfo")
-	if x, found := cache.Cache.Get(key); found {
-		return x.(*host.InfoStat)
-	}
-
-	info, err := host.Info()
-	if err != nil {
-		// don't cache and return zero value
-		log.Errorf("failed to retrieve host info: %s", err)
-		return &host.InfoStat{}
-	}
-	cache.Cache.Set(key, info, cache.NoExpiration)
-	return info
 }
 
 // getHostAliases returns the hostname aliases from different provider

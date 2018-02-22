@@ -7,35 +7,29 @@ package host
 
 import (
 	"runtime"
-	"strconv"
 	"strings"
 
 	"github.com/DataDog/datadog-agent/pkg/util/cache"
-	"github.com/Datadog/gohai/cpu"
-	log "github.com/cihub/seelog"
+	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/host"
+
+	log "github.com/cihub/seelog"
 )
 
-type osVersion [2]string
-
-func fillOsVersion(stats *systemStats, info *host.InfoStat) {
-	// TODO
-	stats.Winver = osVersion{info.PlatformFamily, info.PlatformVersion}
-}
 func getSystemStats() *systemStats {
 	var stats *systemStats
 	key := buildKey("systemStats")
 	if x, found := cache.Cache.Get(key); found {
 		stats = x.(*systemStats)
 	} else {
-		cpuInfo := cpu.getCPUInfo()
+		cpuInfo := getCPUInfo()
 		hostInfo := getHostInfo()
 
 		stats = &systemStats{
 			Machine:   runtime.GOARCH,
 			Platform:  runtime.GOOS,
-			Processor: cpuInfo["model_name"],
-			CPUCores:  strconv.Atoi(cpuInfo["cpu_cores"]),
+			Processor: cpuInfo.ModelName,
+			CPUCores:  cpuInfo.Cores,
 			Pythonv:   strings.Split(getPythonVersion(), " ")[0],
 		}
 
