@@ -2,7 +2,7 @@
 // under the Apache License Version 2.0.
 // This product includes software developed at Datadog (https://www.datadoghq.com/).
 // Copyright 2018 Datadog, Inc.
-// +build !windows
+// +build windows
 
 package system
 
@@ -12,8 +12,8 @@ import (
 
 	"github.com/DataDog/datadog-agent/pkg/collector/check"
 	core "github.com/DataDog/datadog-agent/pkg/collector/corechecks"
+	"github.com/DataDog/datadog-agent/pkg/util/winutil"
 	log "github.com/cihub/seelog"
-	"github.com/shirou/gopsutil/mem"
 
 	"github.com/DataDog/datadog-agent/pkg/aggregator"
 )
@@ -21,8 +21,8 @@ import (
 const memCheckName = "memory"
 
 // For testing purpose
-var virtualMemory = mem.VirtualMemory
-var swapMemory = mem.SwapMemory
+var virtualMemory = winutil.VirtualMemory
+var swapMemory = winutil.SwapMemory
 var runtimeOS = runtime.GOOS
 
 // MemoryCheck doesn't need additional fields
@@ -31,30 +31,6 @@ type MemoryCheck struct {
 }
 
 const mbSize float64 = 1024 * 1024
-
-func (c *MemoryCheck) linuxSpecificVirtualMemoryCheck(v *mem.VirtualMemoryStat) error {
-	sender, err := aggregator.GetSender(c.ID())
-	if err != nil {
-		return err
-	}
-
-	sender.Gauge("system.mem.cached", float64(v.Cached)/mbSize, "", nil)
-	sender.Gauge("system.mem.shared", float64(v.Shared)/mbSize, "", nil)
-	sender.Gauge("system.mem.slab", float64(v.Slab)/mbSize, "", nil)
-	sender.Gauge("system.mem.page_tables", float64(v.PageTables)/mbSize, "", nil)
-	sender.Gauge("system.swap.cached", float64(v.SwapCached)/mbSize, "", nil)
-	return nil
-}
-
-func (c *MemoryCheck) freebsdSpecificVirtualMemoryCheck(v *mem.VirtualMemoryStat) error {
-	sender, err := aggregator.GetSender(c.ID())
-	if err != nil {
-		return err
-	}
-
-	sender.Gauge("system.mem.cached", float64(v.Cached)/mbSize, "", nil)
-	return nil
-}
 
 // Run executes the check
 func (c *MemoryCheck) Run() error {
@@ -66,23 +42,9 @@ func (c *MemoryCheck) Run() error {
 	v, errVirt := virtualMemory()
 	if errVirt == nil {
 		sender.Gauge("system.mem.total", float64(v.Total)/mbSize, "", nil)
-		sender.Gauge("system.mem.free", float64(v.Free)/mbSize, "", nil)
-		sender.Gauge("system.mem.used", float64(v.Total-v.Free)/mbSize, "", nil)
-		sender.Gauge("system.mem.usable", float64(v.Available)/mbSize, "", nil)
+		sender.Gauge("system.mem.free", float64(v.Available)/mbSize, "", nil)
+		sender.Gauge("system.mem.used", float64(v.Total-v.Available)/mbSize, "", nil)
 		sender.Gauge("system.mem.pct_usable", float64(100-v.UsedPercent)/100, "", nil)
-
-		switch runtimeOS {
-		case "linux":
-			e := c.linuxSpecificVirtualMemoryCheck(v)
-			if e != nil {
-				return e
-			}
-		case "freebsd":
-			e := c.freebsdSpecificVirtualMemoryCheck(v)
-			if e != nil {
-				return e
-			}
-		}
 	} else {
 		log.Errorf("system.MemoryCheck: could not retrieve virtual memory stats: %s", errVirt)
 	}

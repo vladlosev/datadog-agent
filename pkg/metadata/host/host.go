@@ -15,7 +15,6 @@ import (
 	"github.com/DataDog/datadog-agent/pkg/metadata/common"
 	"github.com/DataDog/datadog-agent/pkg/util"
 	"github.com/DataDog/datadog-agent/pkg/util/cache"
-	"github.com/shirou/gopsutil/host"
 
 	"github.com/DataDog/datadog-agent/pkg/util/azure"
 	"github.com/DataDog/datadog-agent/pkg/util/cloudfoundry"
@@ -55,11 +54,6 @@ func GetPayloadFromCache(hostname string) *Payload {
 		return x.(*Payload)
 	}
 	return GetPayload(hostname)
-}
-
-// GetStatusInformation just returns an InfoStat object, we need some additional information that's not
-func GetStatusInformation() *host.InfoStat {
-	return getHostInfo()
 }
 
 // GetMeta grabs the metadata from the cache and returns it,

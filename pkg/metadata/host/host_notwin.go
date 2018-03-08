@@ -2,6 +2,7 @@
 // under the Apache License Version 2.0.
 // This product includes software developed at Datadog (https://www.datadoghq.com/).
 // Copyright 2018 Datadog, Inc.
+// +build !windows
 
 package host
 
@@ -73,4 +74,9 @@ func getHostInfo() *host.InfoStat {
 	}
 	cache.Cache.Set(key, info, cache.NoExpiration)
 	return info
+}
+
+// GetStatusInformation just returns an InfoStat object, we need some additional information that's not
+func GetStatusInformation() *host.InfoStat {
+	return getHostInfo()
 }
