@@ -102,6 +102,7 @@ def vet(ctx, targets, env=None):
     # add the /... suffix to the targets
     args = ["{}/...".format(t) for t in targets]
     build_tags = get_default_build_tags()
+    build_tags.append("cgo")
     vetcmd = "go vet -tags \"{}\" ".format(" ".join(build_tags)) + " ".join(args)
     print(vetcmd)
     try:
