@@ -14,8 +14,8 @@ whitelist_file "embedded/lib/python2.7"
 source git: 'https://github.com/DataDog/pip.git'
 
 pip_version = ENV['PIP_VERSION']
-if integrations_core_version.nil? || integrations_core_version.empty?
-  integrations_core_version = 'master'
+if pip_version.nil? || pip_version.empty?
+  pip_version = 'master'
 end
 default_version pip_version
 
