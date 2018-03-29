@@ -9,13 +9,12 @@ dependency 'pip'
 dependency 'datadog-agent'
 
 relative_path 'integrations-core'
-whitelist_file "embedded/lib/python2.7"
 
 source git: 'https://github.com/DataDog/pip.git'
 
 pip_version = ENV['PIP_VERSION']
 if pip_version.nil? || pip_version.empty?
-  pip_version = 'master'
+  pip_version = 'trishank/9.0.3.tuf2'
 end
 default_version pip_version
 
