@@ -3,6 +3,8 @@
 # This product includes software developed at Datadog (https:#www.datadoghq.com/).
 # Copyright 2018 Datadog, Inc.
 
+require './lib/ostools.rb'
+
 name 'datadog-pip'
 
 dependency 'pip'
@@ -20,5 +22,10 @@ default_version pip_version
 
 
 build do
-  pip "install .", :cwd => project_dir
+  if windows?
+    python_bin = "\"#{windows_safe_path(install_dir)}\\embedded\\python.exe\""
+    command("#{python_bin} -m pip install .", cwd: project_dir)
+  else
+    pip "install .", :cwd => project_dir
+  end
 end
