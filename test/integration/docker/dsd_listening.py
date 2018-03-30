@@ -69,7 +69,23 @@ def isUDSListening(container, retries=10):
     return SOCKET_PATH in out
 
 
-class DSDTest(unittest.TestCase):
+class DSDStaticTest(unittest.TestCase):
+    def setUp(self):
+        self.assertIsNotNone(os.environ.get('DOCKER_IMAGE'), "DOCKER_IMAGE envvar needed")
+
+    def test_is_static(self):
+        global client
+        fileOutput = client.containers.run(
+            os.environ.get('DOCKER_IMAGE'),
+            environment=COMMON_ENVIRONMENT,
+            auto_remove=True,
+            stdout=True,
+            command='sh -c "apk add --no-cache file && file /dogstatsd"'
+        )
+        self.assertIn("statically linked", fileOutput)
+
+
+class DSDListeningTest(unittest.TestCase):
     def setUp(self):
         self.assertIsNotNone(os.environ.get('DOCKER_IMAGE'), "DOCKER_IMAGE envvar needed")
 
