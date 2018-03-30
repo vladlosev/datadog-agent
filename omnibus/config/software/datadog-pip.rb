@@ -16,7 +16,7 @@ source git: 'https://github.com/DataDog/pip.git'
 
 pip_version = ENV['PIP_VERSION']
 if pip_version.nil? || pip_version.empty?
-  pip_version = 'trishank/9.0.3.tuf2'
+  pip_version = 'jaime/9.0.3.tuf.0.10.1'
 end
 default_version pip_version
 
