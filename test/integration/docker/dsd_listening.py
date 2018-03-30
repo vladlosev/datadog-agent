@@ -73,7 +73,8 @@ class DSDStaticTest(unittest.TestCase):
     def setUp(self):
         self.assertIsNotNone(os.environ.get('DOCKER_IMAGE'), "DOCKER_IMAGE envvar needed")
 
-    def test_is_static(self):
+    def test_static_binary(self):
+        '''Fails if /dogstatsd is not a static binary, build options are likely broken'''
         global client
         fileOutput = client.containers.run(
             os.environ.get('DOCKER_IMAGE'),
