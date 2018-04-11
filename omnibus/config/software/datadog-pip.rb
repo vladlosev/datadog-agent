@@ -24,7 +24,10 @@ default_version pip_version
 build do
   if windows?
     python_bin = "\"#{windows_safe_path(install_dir)}\\embedded\\python.exe\""
-    command("#{python_bin} -m pip install .", cwd: project_dir)
+    command("#{python_bin} -m pip install wheel", cwd: "#{project_dir}/..")
+    pip "wheel .", :cwd => project_dir
+    python_pip = "\"import pip, glob; pip.main(['install'] + glob.glob('pip/pip*.whl'))\""
+    command("#{python_bin} -c #{python_pip}", cwd: "#{project_dir}/..")
   else
     pip "install .", :cwd => project_dir
   end
